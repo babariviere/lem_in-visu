@@ -2,12 +2,32 @@ use failure::Error;
 use std::collections::HashMap;
 use std::str::FromStr;
 
+#[derive(Debug)]
 pub struct AntMove {
     room1: String,
     room2: String,
 }
 
-impl AntMove {}
+impl AntMove {
+    pub fn parse(s: &str) -> Result<AntMove, ()> {
+        if s.chars().next() != Some('L') {
+            return Err(());
+        }
+        let splitted = s[1..]
+            .trim()
+            .split('-')
+            .map(|s| s.to_owned())
+            .collect::<Vec<String>>();
+        if splitted.len() != 2 {
+            return Err(());
+        }
+        let mut splitted = splitted.into_iter();
+        Ok(AntMove {
+            room1: splitted.next().unwrap(),
+            room2: splitted.next().unwrap(),
+        })
+    }
+}
 
 #[derive(Debug, Fail)]
 pub enum RoomParseError {
@@ -17,11 +37,32 @@ pub enum RoomParseError {
     #[fail(display = "invalid coord")] InvalidCoord,
 }
 
+#[derive(Debug)]
 pub struct Link {
     room1: String,
     room2: String,
 }
 
+impl FromStr for Link {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let splitted = s.trim()
+            .split('-')
+            .map(|s| s.to_owned())
+            .collect::<Vec<String>>();
+        if splitted.len() != 2 {
+            return Err(());
+        }
+        let mut splitted = splitted.into_iter();
+        Ok(Link {
+            room1: splitted.next().unwrap(),
+            room2: splitted.next().unwrap(),
+        })
+    }
+}
+
+#[derive(Debug)]
 pub enum RoomKind {
     Start,
     End,
@@ -40,11 +81,13 @@ impl FromStr for RoomKind {
     }
 }
 
+#[derive(Debug)]
 pub struct Room {
     name: String,
     kind: RoomKind,
     pos: (usize, usize),
     full: bool,
+    links: Vec<Link>,
 }
 
 impl Room {
@@ -54,10 +97,11 @@ impl Room {
             kind: kind,
             pos: pos,
             full: false,
+            links: Vec::new(),
         }
     }
 
-    pub fn parse_room(s: &str) -> Result<Self, Error> {
+    pub fn parse(s: &str) -> Result<Self, Error> {
         let mut room;
         let kind;
         let mut split = s.split('\n');
@@ -90,6 +134,10 @@ impl Room {
     pub fn full(&self) -> bool {
         self.full
     }
+
+    pub fn links(&self) -> &Vec<Link> {
+        &self.links
+    }
 }
 
 impl FromStr for Room {
@@ -112,6 +160,7 @@ impl FromStr for Room {
     }
 }
 
+#[derive(Debug)]
 pub struct Map {
     rooms: HashMap<String, Room>,
     ants: usize,
@@ -127,6 +176,13 @@ impl Map {
 
     pub fn add_room(&mut self, room: Room) {
         self.rooms.insert(room.name.clone(), room);
+    }
+
+    pub fn add_link(&mut self, link: Link) {
+        let mut room = self.rooms.get_mut(&link.room1);
+        if let Some(ref mut r) = room {
+            r.links.push(link);
+        }
     }
 
     pub fn get_room(&self, name: &str) -> Option<&Room> {
