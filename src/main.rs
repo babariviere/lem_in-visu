@@ -87,6 +87,7 @@ fn ui_thread(mut map: Map, mut moves: AntMoves, rx: mpsc::Receiver<ParserData>) 
             window.draw_2d(&e, |c, g| {
                 clear([0., 0., 0., 1.], g);
                 // TODO: map layout to avoid overlap
+                // TODO: fn to do and undo action of each move
                 for room in map.rooms().values() {
                     let (x, y) = room.pos();
                     let rect = [(x * 30) as f64, (y * 30) as f64, 25., 25.];
