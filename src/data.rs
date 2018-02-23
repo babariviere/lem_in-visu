@@ -2,10 +2,12 @@ use failure::Error;
 use std::collections::HashMap;
 use std::str::FromStr;
 
+pub type AntMoves = Vec<Vec<AntMove>>;
+
 #[derive(Debug)]
 pub struct AntMove {
-    room1: String,
-    room2: String,
+    pub room1: String,
+    pub room2: String,
 }
 
 impl AntMove {
@@ -39,8 +41,8 @@ pub enum RoomParseError {
 
 #[derive(Debug)]
 pub struct Link {
-    room1: String,
-    room2: String,
+    pub room1: String,
+    pub room2: String,
 }
 
 impl FromStr for Link {
@@ -131,6 +133,14 @@ impl Room {
         self.pos
     }
 
+    pub fn x(&self) -> usize {
+        self.pos.0
+    }
+
+    pub fn y(&self) -> usize {
+        self.pos.1
+    }
+
     pub fn full(&self) -> bool {
         self.full
     }
@@ -191,5 +201,9 @@ impl Map {
 
     pub fn ants(&self) -> usize {
         self.ants
+    }
+
+    pub fn rooms<'a>(&self) -> &HashMap<String, Room> {
+        &self.rooms
     }
 }
