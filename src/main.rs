@@ -9,75 +9,12 @@ use std::sync::mpsc;
 use std::thread;
 
 mod data;
+mod parser;
 
 use data::*;
+use parser::*;
 
-enum ReadingState {
-    Room,
-    Link,
-    Moves,
-}
-
-enum ParserData {
-    Room(Room),
-    Link(Link),
-    Moves(Vec<AntMove>),
-}
-
-fn parsing(tx: mpsc::Sender<ParserData>) {
-    let stdin = io::stdin();
-    let mut stdin = stdin.lock();
-    let mut state = ReadingState::Room;
-    loop {
-        let mut line = String::new();
-        match stdin.read_line(&mut line) {
-            Ok(s) => {
-                if s == 0 {
-                    break;
-                }
-            }
-            Err(e) => {
-                eprintln!("{}", e);
-                break;
-            }
-        }
-        if line.starts_with("##") {
-            stdin.read_line(&mut line).unwrap();
-        }
-        if line.is_empty() {
-            state = ReadingState::Moves;
-            continue;
-        }
-        match state {
-            ReadingState::Room => match Room::parse(&line) {
-                Ok(r) => tx.send(ParserData::Room(r)).unwrap(),
-                Err(_) => {
-                    state = ReadingState::Link;
-                    let link = Link::from_str(&line).expect("erf");
-                    tx.send(ParserData::Link(link)).unwrap();
-                }
-            },
-            ReadingState::Link => match Link::from_str(&line) {
-                Ok(link) => tx.send(ParserData::Link(link)).unwrap(),
-                Err(_) => {
-                    state = ReadingState::Moves;
-                }
-            },
-            ReadingState::Moves => {
-                let mut turn = Vec::new();
-                for mov in line.split_whitespace() {
-                    match AntMove::parse(&mov) {
-                        Ok(m) => turn.push(m),
-                        Err(_) => {}
-                    }
-                }
-                tx.send(ParserData::Moves(turn)).unwrap();
-            }
-        }
-    }
-}
-
-fn ui_thread(mut map: Map, mut moves: AntMoves, rx: mpsc::Receiver<ParserData>) {
+fn ui_thread(mut map: Map, mut moves: AntMoves) {
     let mut window: PistonWindow = WindowSettings::new("Lem-in Visualiser", (600, 400))
         .exit_on_esc(true)
         .build()
@@ -108,18 +45,11 @@ fn ui_thread(mut map: Map, mut moves: AntMoves, rx: mpsc::Receiver<ParserData>) 
                 }
             });
         }
-        while let Ok(data) = rx.try_recv() {
-            match data {
-                ParserData::Room(r) => map.add_room(r),
-                ParserData::Link(l) => map.add_link(l),
-                ParserData::Moves(m) => moves.push(m),
-            }
-        }
     }
 }
 
 fn main() {
-    let map = {
+    let mut map = {
         let stdin = io::stdin();
         let mut stdin = stdin.lock();
         let mut line = String::new();
@@ -129,10 +59,7 @@ fn main() {
         let ants = line.trim().parse().expect("expecting a number"); // TODO: could be error instead
         Map::new(ants)
     };
-    let moves = Vec::new();
-    let (tx, rx) = mpsc::channel();
-    thread::spawn(move || {
-        parsing(tx);
-    });
-    ui_thread(map, moves, rx);
+    let mut moves = Vec::new();
+    parse(&mut map, &mut moves);
+    ui_thread(map, moves);
 }

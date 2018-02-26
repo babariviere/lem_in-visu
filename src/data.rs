@@ -33,10 +33,14 @@ impl AntMove {
 
 #[derive(Debug, Fail)]
 pub enum RoomParseError {
-    #[fail(display = "invalid room")] InvalidRoom,
-    #[fail(display = "invalid room kind")] InvalidRoomKind,
-    #[fail(display = "invalid room name")] InvalidRoomName,
-    #[fail(display = "invalid coord")] InvalidCoord,
+    #[fail(display = "invalid room")]
+    InvalidRoom,
+    #[fail(display = "invalid room kind")]
+    InvalidRoomKind,
+    #[fail(display = "invalid room name")]
+    InvalidRoomName,
+    #[fail(display = "invalid coord")]
+    InvalidCoord,
 }
 
 #[derive(Debug)]
