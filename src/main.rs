@@ -48,16 +48,21 @@ fn ui_thread(map: Map, _moves: AntMoves) {
                     y -= 1.;
                 }
                 Button::Keyboard(keyboard::Key::Plus) | Button::Keyboard(keyboard::Key::Equals) => {
-                    scale += 0.1;
+                    scale += 0.2;
                 }
                 Button::Keyboard(keyboard::Key::Minus) => {
-                    scale -= 0.1;
+                    scale -= 0.2;
                 }
                 _e => {
                     //println!("{:?}", e);
                 }
             }
         }
+        e.mouse_relative(|dx, dy| {
+            x += dx / 20.;
+            y += dy / 20.;
+        });
+        e.mouse_scroll(|dx, dy| scale += dy / 20.);
     }
 }
 

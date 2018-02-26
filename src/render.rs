@@ -48,6 +48,8 @@ fn calc_way(map: &Map, r1: &str, r2: &str) -> Way {
     res
 }
 
+// TODO: create lane
+
 fn render_way(way: Way, c: context::Context, g: &mut G2d) {
     for i in 0..way.len() - 1 {
         line(
