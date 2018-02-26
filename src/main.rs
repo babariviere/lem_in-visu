@@ -4,9 +4,6 @@ extern crate piston_window;
 
 use piston_window::*;
 use std::io::{self, BufRead};
-use std::str::FromStr;
-use std::sync::mpsc;
-use std::thread;
 
 mod data;
 mod parser;
@@ -21,16 +18,45 @@ fn ui_thread(map: Map, _moves: AntMoves) {
         .exit_on_esc(true)
         .build()
         .unwrap();
+    let mut x = 0.;
+    let mut y = 0.;
+    let mut scale = 1.;
     while let Some(e) = window.next() {
         if let Some(_r) = e.render_args() {
-            window.draw_2d(&e, |c, g| {
+            window.draw_2d(&e, |mut c, g| {
                 clear([0., 0., 0., 1.], g);
                 // TODO: map layout to avoid overlap
                 // TODO: fn to do and undo action of each move
+                c.transform = c.transform.trans(x * scale, y * scale).zoom(scale);
                 for room in map.rooms().values() {
                     room.render(&map, c, g);
                 }
             });
+        }
+        if let Some(k) = e.press_args() {
+            match k {
+                Button::Keyboard(keyboard::Key::Left) => {
+                    x += 1.;
+                }
+                Button::Keyboard(keyboard::Key::Right) => {
+                    x -= 1.;
+                }
+                Button::Keyboard(keyboard::Key::Up) => {
+                    y += 1.;
+                }
+                Button::Keyboard(keyboard::Key::Down) => {
+                    y -= 1.;
+                }
+                Button::Keyboard(keyboard::Key::Plus) | Button::Keyboard(keyboard::Key::Equals) => {
+                    scale += 0.1;
+                }
+                Button::Keyboard(keyboard::Key::Minus) => {
+                    scale -= 0.1;
+                }
+                _e => {
+                    //println!("{:?}", e);
+                }
+            }
         }
     }
 }

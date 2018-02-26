@@ -68,7 +68,7 @@ impl FromStr for Link {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum RoomKind {
     Start,
     End,
@@ -87,13 +87,13 @@ impl FromStr for RoomKind {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Room {
     name: String,
     kind: RoomKind,
     pos: (usize, usize),
     full: bool,
-    links: Vec<Link>,
+    links: Vec<String>,
 }
 
 impl Room {
@@ -149,7 +149,7 @@ impl Room {
         self.full
     }
 
-    pub fn links(&self) -> &Vec<Link> {
+    pub fn links(&self) -> &Vec<String> {
         &self.links
     }
 }
@@ -193,10 +193,12 @@ impl Map {
     }
 
     pub fn add_link(&mut self, link: Link) {
-        let mut room = self.rooms.get_mut(&link.room1);
-        if let Some(ref mut r) = room {
-            r.links.push(link);
+        if let Some(ref mut r) = self.rooms.get_mut(&link.room1) {
+            r.links.push(link.room2.clone());
         }
+        //if let Some(ref mut r) = self.rooms.get_mut(&link.room2) {
+        //    r.links.push(link.room1.clone());
+        //}
     }
 
     pub fn get_room(&self, name: &str) -> Option<&Room> {
