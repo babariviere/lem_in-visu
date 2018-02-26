@@ -10,11 +10,13 @@ use std::thread;
 
 mod data;
 mod parser;
+mod render;
 
 use data::*;
 use parser::*;
+use render::*;
 
-fn ui_thread(mut map: Map, mut moves: AntMoves) {
+fn ui_thread(map: Map, _moves: AntMoves) {
     let mut window: PistonWindow = WindowSettings::new("Lem-in Visualiser", (600, 400))
         .exit_on_esc(true)
         .build()
@@ -26,22 +28,7 @@ fn ui_thread(mut map: Map, mut moves: AntMoves) {
                 // TODO: map layout to avoid overlap
                 // TODO: fn to do and undo action of each move
                 for room in map.rooms().values() {
-                    let (x, y) = room.pos();
-                    let rect = [(x * 30) as f64, (y * 30) as f64, 25., 25.];
-                    rectangle([1., 1., 1., 1.], rect, c.transform, g);
-                    for link in room.links() {
-                        let r2 = match map.get_room(&link.room2) {
-                            Some(s) => s,
-                            None => continue,
-                        };
-                        let l = [
-                            (x * 30) as f64,
-                            (y * 30) as f64,
-                            (r2.x() * 30) as f64,
-                            (r2.y() * 30) as f64,
-                        ];
-                        line([1., 1., 1., 1.], 1., l, c.transform, g);
-                    }
+                    room.render(&map, c, g);
                 }
             });
         }
