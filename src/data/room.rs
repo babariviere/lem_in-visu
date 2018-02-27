@@ -15,7 +15,7 @@ pub enum RoomParseError {
     InvalidCoord,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum RoomKind {
     Start,
     End,
@@ -87,6 +87,14 @@ impl Room {
     pub fn links(&self) -> &Vec<String> {
         &self.links
     }
+
+    pub fn set_full(&mut self) {
+        self.full = true;
+    }
+
+    pub fn set_empty(&mut self) {
+        self.full = false;
+    }
 }
 
 impl FromStr for Room {
@@ -115,6 +123,14 @@ impl Render for Room {
         let x = x as f64 * (ROOM_SIZE + ROOM_GAP * 2.) + ROOM_GAP;
         let y = y as f64 * (ROOM_SIZE + ROOM_GAP * 2.) + ROOM_GAP;
         let rect = [x, y, ROOM_SIZE, ROOM_SIZE];
-        rectangle(ROOM_COLOR, rect, c.transform, g);
+        if self.kind == RoomKind::Start {
+            rectangle([1., 1., 0., 1.], rect, c.transform, g);
+        } else if self.kind == RoomKind::End {
+            rectangle([0., 1., 1., 1.], rect, c.transform, g);
+        } else if !self.full {
+            rectangle(ROOM_COLOR, rect, c.transform, g);
+        } else {
+            rectangle(ANT_COLOR, rect, c.transform, g);
+        }
     }
 }

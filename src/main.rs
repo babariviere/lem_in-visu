@@ -4,6 +4,7 @@ extern crate piston_window;
 
 use piston_window::*;
 use std::io::{self, BufRead};
+use std::time::{Duration, Instant};
 
 mod data;
 mod map;
@@ -15,7 +16,7 @@ use map::Map;
 use parser::*;
 use render::*;
 
-fn ui_thread(map: MapData, _moves: &[Vec<AntMove>]) {
+fn ui_thread(map: MapData, moves: &[Vec<AntMove>]) {
     let mut window: PistonWindow = WindowSettings::new("Lem-in Visualiser", (600, 400))
         .exit_on_esc(true)
         .build()
@@ -25,7 +26,10 @@ fn ui_thread(map: MapData, _moves: &[Vec<AntMove>]) {
     let mut scale = 1.;
     let mut mouse_move = false;
     let mut mouse_scroll = false;
-    let map: Map = map.into();
+    let mut instant = Instant::now();
+    let three_secs = Duration::from_secs(3);
+    let mut moves_idx = 0;
+    let mut map: Map = map.into();
     while let Some(e) = window.next() {
         if let Some(_r) = e.render_args() {
             window.draw_2d(&e, |mut c, g| {
@@ -83,6 +87,14 @@ fn ui_thread(map: MapData, _moves: &[Vec<AntMove>]) {
             }
         });
         e.mouse_scroll(|_dx, dy| scale += dy / 100.);
+        if instant.elapsed() > three_secs && moves_idx < moves.len() {
+            for m in &moves[moves_idx] {
+                println!("{:?}", m);
+                map.apply_move(&m);
+            }
+            moves_idx += 1;
+            instant = Instant::now();
+        }
     }
 }
 

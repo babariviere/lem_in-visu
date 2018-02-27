@@ -94,6 +94,11 @@ impl Map {
         map.build_ways();
         map
     }
+
+    pub fn apply_move(&mut self, ant_move: &AntMove) {
+        self.rooms.get_mut(&ant_move.room1).map(|r| r.set_empty());
+        self.rooms.get_mut(&ant_move.room2).map(|r| r.set_full());
+    }
 }
 
 impl Render for Map {
