@@ -24,6 +24,7 @@ fn ui_thread(map: MapData, _moves: &[Vec<AntMove>]) {
     let mut y = 0.;
     let mut scale = 1.;
     let mut mouse_move = false;
+    let mut mouse_scroll = false;
     let map: Map = map.into();
     while let Some(e) = window.next() {
         if let Some(_r) = e.render_args() {
@@ -37,44 +38,51 @@ fn ui_thread(map: MapData, _moves: &[Vec<AntMove>]) {
         }
         if let Some(k) = e.press_args() {
             match k {
-                Button::Keyboard(keyboard::Key::Left) => {
+                Button::Keyboard(Key::Left) | Button::Keyboard(Key::A) => {
                     x += 1.;
                 }
-                Button::Keyboard(keyboard::Key::Right) => {
+                Button::Keyboard(Key::Right) | Button::Keyboard(Key::D) => {
                     x -= 1.;
                 }
-                Button::Keyboard(keyboard::Key::Up) => {
+                Button::Keyboard(Key::Up) | Button::Keyboard(Key::W) => {
                     y += 1.;
                 }
-                Button::Keyboard(keyboard::Key::Down) => {
+                Button::Keyboard(Key::Down) | Button::Keyboard(Key::S) => {
                     y -= 1.;
                 }
-                Button::Keyboard(keyboard::Key::Plus) | Button::Keyboard(keyboard::Key::Equals) => {
+                Button::Keyboard(Key::Plus) | Button::Keyboard(Key::Equals) => {
                     scale += 0.2;
                 }
-                Button::Keyboard(keyboard::Key::Minus) => {
+                Button::Keyboard(Key::Minus) => {
                     if scale >= 0.3 {
                         scale -= 0.2;
                     }
                 }
-                Button::Mouse(_) => mouse_move = true,
+                Button::Keyboard(Key::Z) => mouse_scroll = !mouse_scroll,
+                Button::Mouse(MouseButton::Left) => {
+                    mouse_move = true;
+                    mouse_scroll = false;
+                }
                 _e => {
                     //println!("{:?}", e);
                 }
             }
         }
         if let Some(r) = e.release_args() {
-            if let Button::Mouse(_) = r {
-                mouse_move = false;
+            match r {
+                Button::Mouse(MouseButton::Left) => mouse_move = false,
+                _ => {}
             }
         }
         e.mouse_relative(|dx, dy| {
             if mouse_move {
-                x += dx / 10.;
-                y += dy / 10.;
+                x += dx / 10. * scale;
+                y += dy / 10. * scale;
+            } else if mouse_scroll {
+                scale += dy / 100.;
             }
         });
-        //e.mouse_scroll(|_dx, dy| scale += dy / 20.);
+        e.mouse_scroll(|_dx, dy| scale += dy / 100.);
     }
 }
 

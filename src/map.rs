@@ -50,16 +50,16 @@ impl Way {
 
 impl Render for Way {
     fn render(&self, c: context::Context, g: &mut G2d) {
+        let round_line = line::Line::new(WAY_COLOR, 1.).shape(line::Shape::Bevel);
         for i in 0..self.points.len() - 1 {
-            line(
-                WAY_COLOR,
-                1.,
+            round_line.draw(
                 [
                     self.points[i].0 + ROOM_SIZE / 2.,
                     self.points[i].1 + ROOM_SIZE / 2.,
                     self.points[i + 1].0 + ROOM_SIZE / 2.,
                     self.points[i + 1].1 + ROOM_SIZE / 2.,
                 ],
+                &c.draw_state,
                 c.transform,
                 g,
             );
