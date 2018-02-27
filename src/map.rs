@@ -37,13 +37,20 @@ impl Way {
     pub fn build(map: &HashMap<String, Room>, link: &Link) -> Way {
         let mut points = Vec::new();
         let r1 = map.get(&link.room1).unwrap();
-        let p1 = coord_to_center(r1.pos());
+        let mut c1 = coord_to_center(r1.pos());
         let r2 = map.get(&link.room2).unwrap();
-        let p2 = coord_to_center(r2.pos());
-        points.push(p1);
-        points.push(closest_coord(p1, p2));
-        points.push(closest_coord(p2, p1));
-        points.push(p2);
+        let c2 = coord_to_center(r2.pos());
+        points.push(c1);
+        c1 = closest_coord(c1, c2);
+        points.push(c1);
+        while c1.0 != c2.0 || c1.1 != c2.1 {
+            let dx = (c1.0 - c2.0).abs();
+            let dy = (c1.1 - c2.1).abs();
+            if dx > dy {}
+        }
+        c1 = closest_coord(c2, c1);
+        points.push(c1);
+        points.push(c2);
         Way { points }
     }
 }
