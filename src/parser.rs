@@ -8,7 +8,7 @@ enum ReadingState {
     Moves,
 }
 
-pub fn parse(map: &mut Map, moves: &mut AntMoves) {
+pub fn parse(map: &mut MapData, moves: &mut AntMoves) {
     let stdin = io::stdin();
     let mut stdin = stdin.lock();
     let mut state = ReadingState::Room;
@@ -38,11 +38,11 @@ pub fn parse(map: &mut Map, moves: &mut AntMoves) {
                 Err(_) => {
                     state = ReadingState::Link;
                     let link = Link::from_str(&line).expect("erf");
-                    map.add_link(link);
+                    map.add_link(&link);
                 }
             },
             ReadingState::Link => match Link::from_str(&line) {
-                Ok(link) => map.add_link(link),
+                Ok(link) => map.add_link(&link),
                 Err(_) => {
                     state = ReadingState::Moves;
                 }
@@ -50,9 +50,8 @@ pub fn parse(map: &mut Map, moves: &mut AntMoves) {
             ReadingState::Moves => {
                 let mut turn = Vec::new();
                 for mov in line.split_whitespace() {
-                    match AntMove::parse(&mov) {
-                        Ok(m) => turn.push(m),
-                        Err(_) => {}
+                    if let Ok(m) = AntMove::parse(mov) {
+                        turn.push(m);
                     }
                 }
                 moves.push(turn);

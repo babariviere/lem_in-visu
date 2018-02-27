@@ -6,14 +6,16 @@ use piston_window::*;
 use std::io::{self, BufRead};
 
 mod data;
+mod map;
 mod parser;
 mod render;
 
 use data::*;
+use map::Map;
 use parser::*;
 use render::*;
 
-fn ui_thread(map: Map, _moves: AntMoves) {
+fn ui_thread(map: MapData, _moves: &[Vec<AntMove>]) {
     let mut window: PistonWindow = WindowSettings::new("Lem-in Visualiser", (600, 400))
         .exit_on_esc(true)
         .build()
@@ -21,6 +23,8 @@ fn ui_thread(map: Map, _moves: AntMoves) {
     let mut x = 0.;
     let mut y = 0.;
     let mut scale = 1.;
+    let mut mouse_move = false;
+    let map: Map = map.into();
     while let Some(e) = window.next() {
         if let Some(_r) = e.render_args() {
             window.draw_2d(&e, |mut c, g| {
@@ -28,9 +32,7 @@ fn ui_thread(map: Map, _moves: AntMoves) {
                 // TODO: map layout to avoid overlap
                 // TODO: fn to do and undo action of each move
                 c.transform = c.transform.trans(x * scale, y * scale).zoom(scale);
-                for room in map.rooms().values() {
-                    room.render(&map, c, g);
-                }
+                map.render(c, g);
             });
         }
         if let Some(k) = e.press_args() {
@@ -51,18 +53,28 @@ fn ui_thread(map: Map, _moves: AntMoves) {
                     scale += 0.2;
                 }
                 Button::Keyboard(keyboard::Key::Minus) => {
-                    scale -= 0.2;
+                    if scale >= 0.3 {
+                        scale -= 0.2;
+                    }
                 }
+                Button::Mouse(_) => mouse_move = true,
                 _e => {
                     //println!("{:?}", e);
                 }
             }
         }
+        if let Some(r) = e.release_args() {
+            if let Button::Mouse(_) = r {
+                mouse_move = false;
+            }
+        }
         e.mouse_relative(|dx, dy| {
-            x += dx / 20.;
-            y += dy / 20.;
+            if mouse_move {
+                x += dx / 10.;
+                y += dy / 10.;
+            }
         });
-        e.mouse_scroll(|dx, dy| scale += dy / 20.);
+        //e.mouse_scroll(|_dx, dy| scale += dy / 20.);
     }
 }
 
@@ -75,9 +87,9 @@ fn main() {
             .read_line(&mut line)
             .expect("unable to read number of ants");
         let ants = line.trim().parse().expect("expecting a number"); // TODO: could be error instead
-        Map::new(ants)
+        MapData::new(ants)
     };
     let mut moves = Vec::new();
     parse(&mut map, &mut moves);
-    ui_thread(map, moves);
+    ui_thread(map, &moves);
 }
