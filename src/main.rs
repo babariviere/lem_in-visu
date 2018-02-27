@@ -46,6 +46,40 @@ impl Default for ViewSettings {
     }
 }
 
+fn handle_press_ev(event: Button, settings: &mut ViewSettings) {
+    match event {
+        Button::Keyboard(Key::Left) | Button::Keyboard(Key::A) => {
+            settings.x += 1.;
+        }
+        Button::Keyboard(Key::Right) | Button::Keyboard(Key::D) => {
+            settings.x -= 1.;
+        }
+        Button::Keyboard(Key::Up) | Button::Keyboard(Key::W) => {
+            settings.y += 1.;
+        }
+        Button::Keyboard(Key::Down) | Button::Keyboard(Key::S) => {
+            settings.y -= 1.;
+        }
+        Button::Keyboard(Key::Plus) | Button::Keyboard(Key::Equals) => {
+            settings.scale += 0.2;
+        }
+        Button::Keyboard(Key::Minus) => {
+            settings.scale -= 0.2;
+        }
+        Button::Keyboard(Key::Z) => settings.mouse_scroll = !settings.mouse_scroll,
+        Button::Keyboard(Key::R) => {
+            settings.reset();
+        }
+        Button::Mouse(MouseButton::Left) => {
+            settings.mouse_move = true;
+            settings.mouse_scroll = false;
+        }
+        _e => {
+            //println!("{:?}", e);
+        }
+    }
+}
+
 fn ui_thread(map: MapData, moves: &[Vec<AntMove>]) {
     let mut window: PistonWindow = WindowSettings::new("Lem-in Visualiser", (600, 400))
         .exit_on_esc(true)
@@ -63,8 +97,6 @@ fn ui_thread(map: MapData, moves: &[Vec<AntMove>]) {
         if let Some(_r) = e.render_args() {
             window.draw_2d(&e, |mut c, g| {
                 clear([0., 0., 0., 1.], g);
-                // TODO: map layout to avoid overlap
-                // TODO: fn to do and undo action of each move
                 c.transform = c.transform
                     .trans(settings.x * settings.scale, settings.y * settings.scale)
                     .zoom(settings.scale);
@@ -72,37 +104,7 @@ fn ui_thread(map: MapData, moves: &[Vec<AntMove>]) {
             });
         }
         if let Some(k) = e.press_args() {
-            match k {
-                Button::Keyboard(Key::Left) | Button::Keyboard(Key::A) => {
-                    settings.x += 1.;
-                }
-                Button::Keyboard(Key::Right) | Button::Keyboard(Key::D) => {
-                    settings.x -= 1.;
-                }
-                Button::Keyboard(Key::Up) | Button::Keyboard(Key::W) => {
-                    settings.y += 1.;
-                }
-                Button::Keyboard(Key::Down) | Button::Keyboard(Key::S) => {
-                    settings.y -= 1.;
-                }
-                Button::Keyboard(Key::Plus) | Button::Keyboard(Key::Equals) => {
-                    settings.scale += 0.2;
-                }
-                Button::Keyboard(Key::Minus) => {
-                    settings.scale -= 0.2;
-                }
-                Button::Keyboard(Key::Z) => settings.mouse_scroll = !settings.mouse_scroll,
-                Button::Keyboard(Key::R) => {
-                    settings.reset();
-                }
-                Button::Mouse(MouseButton::Left) => {
-                    settings.mouse_move = true;
-                    settings.mouse_scroll = false;
-                }
-                _e => {
-                    //println!("{:?}", e);
-                }
-            }
+            handle_press_ev(k, &mut settings);
         }
         if let Some(r) = e.release_args() {
             match r {
@@ -115,8 +117,8 @@ fn ui_thread(map: MapData, moves: &[Vec<AntMove>]) {
         }
         e.mouse_relative(|dx, dy| {
             if settings.mouse_move {
-                settings.x += dx / 10. * settings.scale;
-                settings.y += dy / 10. * settings.scale;
+                settings.x += dx / 5.;
+                settings.y += dy / 5.;
             } else if settings.mouse_scroll {
                 settings.scale += dy / 100.;
             }
