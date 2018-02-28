@@ -16,17 +16,21 @@ fn coord_to_center(coord: (usize, usize)) -> (i64, i64) {
 fn closest_coord(c1: (i64, i64), c2: (i64, i64)) -> (i64, i64) {
     let dx = c2.0 - c1.0;
     let dy = c2.1 - c1.1;
-    if dy.abs() > dx.abs() {
-        if dx < 0 {
-            (c1.0 - TILE_SIZE / 3, c1.1)
-        } else {
-            (c1.0 + TILE_SIZE / 3, c1.1)
-        }
-    } else if dy < 0 {
-        (c1.0, c1.1 + TILE_SIZE / 3)
+    let x = if dx < 0 {
+        c1.0 - TILE_SIZE / 3
+    } else if dx > 0 {
+        c1.0 + TILE_SIZE / 3
     } else {
-        (c1.0, c1.1 - TILE_SIZE / 3)
-    }
+        c1.0
+    };
+    let y = if dy > 0 {
+        c1.1 + TILE_SIZE / 3
+    } else if dy < 0 {
+        c1.1 - TILE_SIZE / 3
+    } else {
+        c1.1
+    };
+    (x, y)
 }
 
 pub struct Way {
@@ -48,13 +52,6 @@ impl Way {
             c1.1 -= c1.1 % TILE_SIZE;
             let dx = c2.0 - c1.0;
             let dy = c2.1 - c1.1;
-            println!("dx={} dy={}", dx, dy);
-            println!(
-                "rx={} ry={} s={}",
-                (dx % TILE_SIZE),
-                (dy % TILE_SIZE),
-                TILE_SIZE
-            );
             if dx.abs() >= TILE_SIZE {
                 if dx > 0 {
                     c1.0 += TILE_SIZE;
@@ -75,7 +72,6 @@ impl Way {
             }
             //c1.1 %= TILE_SIZE;
             // TODO: check collision
-            println!("{:?} {:?}", c1, c2);
             //::std::thread::sleep_ms(300);
             if c1 != c2 {
                 points.push(c1);
