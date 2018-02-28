@@ -3,34 +3,34 @@ use render::*;
 use piston_window::*;
 use std::collections::HashMap;
 
-fn coord_to_center(coord: (usize, usize)) -> (f64, f64) {
-    let mut x = coord.0 as f64;
-    let mut y = coord.1 as f64;
-    x *= ROOM_SIZE + ROOM_GAP * 2.;
-    y *= ROOM_SIZE + ROOM_GAP * 2.;
+fn coord_to_center(coord: (usize, usize)) -> (i64, i64) {
+    let mut x = coord.0 as i64;
+    let mut y = coord.1 as i64;
+    x *= TILE_SIZE;
+    y *= TILE_SIZE;
     x += ROOM_GAP;
     y += ROOM_GAP;
     (x, y)
 }
 
-fn closest_coord(c1: (f64, f64), c2: (f64, f64)) -> (f64, f64) {
-    let dx = c1.0 - c2.0;
-    let dy = c1.1 - c2.1;
-    if dx.abs() > dy.abs() {
-        if dx < 0. {
-            (c1.0 + ROOM_SIZE / 2. + ROOM_GAP / 2., c1.1)
+fn closest_coord(c1: (i64, i64), c2: (i64, i64)) -> (i64, i64) {
+    let dx = c2.0 - c1.0;
+    let dy = c2.1 - c1.1;
+    if dy.abs() > dx.abs() {
+        if dx < 0 {
+            (c1.0 - TILE_SIZE / 3, c1.1)
         } else {
-            (c1.0 - ROOM_SIZE / 2. - ROOM_GAP / 2., c1.1)
+            (c1.0 + TILE_SIZE / 3, c1.1)
         }
-    } else if dy < 0. {
-        (c1.0, c1.1 + ROOM_SIZE / 2. + ROOM_GAP / 2.)
+    } else if dy < 0 {
+        (c1.0, c1.1 + TILE_SIZE / 3)
     } else {
-        (c1.0, c1.1 - ROOM_SIZE / 2. - ROOM_GAP / 2.)
+        (c1.0, c1.1 - TILE_SIZE / 3)
     }
 }
 
 pub struct Way {
-    points: Vec<(f64, f64)>,
+    points: Vec<(i64, i64)>,
 }
 
 impl Way {
@@ -44,9 +44,42 @@ impl Way {
         c1 = closest_coord(c1, c2);
         points.push(c1);
         while c1.0 != c2.0 || c1.1 != c2.1 {
-            let dx = (c1.0 - c2.0).abs();
-            let dy = (c1.1 - c2.1).abs();
-            if dx > dy {}
+            c1.0 -= c1.0 % TILE_SIZE;
+            c1.1 -= c1.1 % TILE_SIZE;
+            let dx = c2.0 - c1.0;
+            let dy = c2.1 - c1.1;
+            println!("dx={} dy={}", dx, dy);
+            println!(
+                "rx={} ry={} s={}",
+                (dx % TILE_SIZE),
+                (dy % TILE_SIZE),
+                TILE_SIZE
+            );
+            if dx.abs() >= TILE_SIZE {
+                if dx > 0 {
+                    c1.0 += TILE_SIZE;
+                } else {
+                    c1.0 -= TILE_SIZE;
+                }
+            } else {
+                c1.0 += dx;
+            }
+            if dy.abs() >= TILE_SIZE {
+                if dy > 0 {
+                    c1.1 += TILE_SIZE;
+                } else {
+                    c1.1 -= TILE_SIZE;
+                }
+            } else {
+                c1.1 += dy;
+            }
+            //c1.1 %= TILE_SIZE;
+            // TODO: check collision
+            println!("{:?} {:?}", c1, c2);
+            //::std::thread::sleep_ms(300);
+            if c1 != c2 {
+                points.push(c1);
+            }
         }
         c1 = closest_coord(c2, c1);
         points.push(c1);
@@ -61,10 +94,10 @@ impl Render for Way {
         for i in 0..self.points.len() - 1 {
             round_line.draw(
                 [
-                    self.points[i].0 + ROOM_SIZE / 2.,
-                    self.points[i].1 + ROOM_SIZE / 2.,
-                    self.points[i + 1].0 + ROOM_SIZE / 2.,
-                    self.points[i + 1].1 + ROOM_SIZE / 2.,
+                    self.points[i].0 as f64 + ROOM_SIZE as f64 / 2.,
+                    self.points[i].1 as f64 + ROOM_SIZE as f64 / 2.,
+                    self.points[i + 1].0 as f64 + ROOM_SIZE as f64 / 2.,
+                    self.points[i + 1].1 as f64 + ROOM_SIZE as f64 / 2.,
                 ],
                 &c.draw_state,
                 c.transform,

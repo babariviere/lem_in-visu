@@ -120,9 +120,9 @@ impl FromStr for Room {
 impl Render for Room {
     fn render(&self, c: context::Context, g: &mut G2d) {
         let (x, y) = self.pos();
-        let x = x as f64 * (ROOM_SIZE + ROOM_GAP * 2.) + ROOM_GAP;
-        let y = y as f64 * (ROOM_SIZE + ROOM_GAP * 2.) + ROOM_GAP;
-        let rect = [x, y, ROOM_SIZE, ROOM_SIZE];
+        let x = x as f64 * TILE_SIZE as f64 + ROOM_GAP as f64;
+        let y = y as f64 * TILE_SIZE as f64 + ROOM_GAP as f64;
+        let rect = [x, y, ROOM_SIZE as f64, ROOM_SIZE as f64];
         if self.kind == RoomKind::Start {
             rectangle([1., 1., 0., 1.], rect, c.transform, g);
         } else if self.kind == RoomKind::End {
