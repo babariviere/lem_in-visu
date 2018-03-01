@@ -37,6 +37,6 @@ start-2
 end-4
 end-1
 
-Lstart-1
-L1-end Lstart-1
+L0-1
+L0-end L1-1
 L1-end

@@ -39,8 +39,8 @@ pub struct Room {
     name: String,
     kind: RoomKind,
     pos: (usize, usize),
-    full: bool,
     links: Vec<String>,
+    pub ants: Vec<u64>,
 }
 
 impl Room {
@@ -49,8 +49,8 @@ impl Room {
             name,
             kind,
             pos,
-            full: false,
             links: Vec::new(),
+            ants: Vec::new(),
         }
     }
 
@@ -88,12 +88,8 @@ impl Room {
         &self.links
     }
 
-    pub fn set_full(&mut self) {
-        self.full = true;
-    }
-
-    pub fn set_empty(&mut self) {
-        self.full = false;
+    pub fn kind(&self) -> &RoomKind {
+        &self.kind
     }
 }
 
@@ -127,7 +123,7 @@ impl Render for Room {
             rectangle([1., 1., 0., 1.], rect, c.transform, g);
         } else if self.kind == RoomKind::End {
             rectangle([0., 1., 1., 1.], rect, c.transform, g);
-        } else if !self.full {
+        } else if self.ants.len() == 0 {
             rectangle(ROOM_COLOR, rect, c.transform, g);
         } else {
             rectangle(ANT_COLOR, rect, c.transform, g);

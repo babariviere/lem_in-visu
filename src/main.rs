@@ -83,6 +83,8 @@ fn handle_press_ev(event: Button, settings: &mut ViewSettings) {
 fn ui_thread(map: MapData, moves: &[Vec<AntMove>]) {
     let mut window: PistonWindow = WindowSettings::new("Lem-in Visualiser", (600, 400))
         .exit_on_esc(true)
+        .srgb(false)
+        .opengl(OpenGL::V3_3)
         .build()
         .unwrap();
     let mut settings = ViewSettings::default();

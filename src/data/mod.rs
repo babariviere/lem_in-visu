@@ -10,8 +10,8 @@ pub type AntMoves = Vec<Vec<AntMove>>;
 
 #[derive(Debug)]
 pub struct AntMove {
-    pub room1: String,
-    pub room2: String,
+    pub ant: u64,
+    pub room: String,
 }
 
 impl AntMove {
@@ -29,8 +29,8 @@ impl AntMove {
         }
         let mut splitted = splitted.into_iter();
         Ok(AntMove {
-            room1: splitted.next().unwrap(),
-            room2: splitted.next().unwrap(),
+            ant: splitted.next().unwrap().parse().unwrap(),
+            room: splitted.next().unwrap(),
         })
     }
 }

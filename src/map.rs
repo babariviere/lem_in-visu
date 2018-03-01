@@ -105,7 +105,6 @@ impl Render for Way {
 
 pub struct Map {
     rooms: HashMap<String, Room>,
-    ants: usize,
     ways: Vec<Way>,
 }
 
@@ -121,10 +120,17 @@ impl Map {
         }
     }
 
-    pub fn new(rooms: HashMap<String, Room>, ants: usize) -> Map {
+    pub fn new(mut rooms: HashMap<String, Room>, ants: usize) -> Map {
+        // TODO: add all ants in room start
+        for room in rooms.values_mut() {
+            if room.kind() == &RoomKind::Start {
+                for i in 0..ants {
+                    room.ants.push(i as u64);
+                }
+            }
+        }
         let mut map = Map {
             rooms,
-            ants,
             ways: Vec::new(),
         };
         map.build_ways();
@@ -132,8 +138,15 @@ impl Map {
     }
 
     pub fn apply_move(&mut self, ant_move: &AntMove) {
-        self.rooms.get_mut(&ant_move.room1).map(|r| r.set_empty());
-        self.rooms.get_mut(&ant_move.room2).map(|r| r.set_full());
+        for room in self.rooms.values_mut() {
+            if room.ants.contains(&ant_move.ant) {
+                room.ants.retain(|&x| x != ant_move.ant);
+                break;
+            }
+        }
+        self.rooms
+            .get_mut(&ant_move.room)
+            .map(|r| r.ants.push(ant_move.ant));
     }
 }
 
