@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate failure;
 extern crate piston_window;
+extern crate rand;
 
 use piston_window::*;
 use std::io::{self, BufRead};

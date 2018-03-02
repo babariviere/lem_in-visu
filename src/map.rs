@@ -1,4 +1,5 @@
 use data::*;
+use rand::{self, Rng};
 use render::*;
 use piston_window::*;
 use std::collections::HashMap;
@@ -35,6 +36,7 @@ fn closest_coord(c1: (i64, i64), c2: (i64, i64)) -> (i64, i64) {
 
 pub struct Way {
     points: Vec<(i64, i64)>,
+    color: [f32; 4],
 }
 
 impl Way {
@@ -80,13 +82,14 @@ impl Way {
         c1 = closest_coord(c2, c1);
         points.push(c1);
         points.push(c2);
-        Way { points }
+        let mut rng = rand::thread_rng();
+        Way { points, color: [rng.gen(), rng.gen(), rng.gen(), 0.1] }
     }
 }
 
 impl Render for Way {
     fn render(&self, c: context::Context, g: &mut G2d) {
-        let round_line = line::Line::new(WAY_COLOR, 1.).shape(line::Shape::Bevel);
+        let round_line = line::Line::new(self.color, 1.).shape(line::Shape::Bevel);
         for i in 0..self.points.len() - 1 {
             round_line.draw(
                 [

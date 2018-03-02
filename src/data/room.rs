@@ -120,9 +120,9 @@ impl Render for Room {
         let y = y as f64 * TILE_SIZE as f64 + ROOM_GAP as f64;
         let rect = [x, y, ROOM_SIZE as f64, ROOM_SIZE as f64];
         if self.kind == RoomKind::Start {
-            rectangle([1., 1., 0., 1.], rect, c.transform, g);
+            rectangle([0., 1., 0., 1.], rect, c.transform, g);
         } else if self.kind == RoomKind::End {
-            rectangle([0., 1., 1., 1.], rect, c.transform, g);
+            rectangle([1., 0., 0., 1.], rect, c.transform, g);
         } else if self.ants.len() == 0 {
             rectangle(ROOM_COLOR, rect, c.transform, g);
         } else {
