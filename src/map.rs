@@ -83,7 +83,10 @@ impl Way {
         points.push(c1);
         points.push(c2);
         let mut rng = rand::thread_rng();
-        Way { points, color: [rng.gen(), rng.gen(), rng.gen(), 0.1] }
+        Way {
+            points,
+            color: [rng.gen(), rng.gen(), rng.gen(), 0.1],
+        }
     }
 }
 

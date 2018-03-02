@@ -50,21 +50,23 @@ impl Default for ViewSettings {
 fn handle_press_ev(event: Button, settings: &mut ViewSettings) {
     match event {
         Button::Keyboard(Key::Left) | Button::Keyboard(Key::A) => {
-            settings.x += 1.;
+            settings.x += 5.;
         }
         Button::Keyboard(Key::Right) | Button::Keyboard(Key::D) => {
-            settings.x -= 1.;
+            settings.x -= 5.;
         }
         Button::Keyboard(Key::Up) | Button::Keyboard(Key::W) => {
-            settings.y += 1.;
+            settings.y += 5.;
         }
         Button::Keyboard(Key::Down) | Button::Keyboard(Key::S) => {
-            settings.y -= 1.;
+            settings.y -= 5.;
         }
-        Button::Keyboard(Key::Plus) | Button::Keyboard(Key::Equals) => {
+        Button::Keyboard(Key::Plus)
+        | Button::Keyboard(Key::Equals)
+        | Button::Keyboard(Key::NumPadPlus) => {
             settings.scale += 0.2;
         }
-        Button::Keyboard(Key::Minus) => {
+        Button::Keyboard(Key::Minus) | Button::Keyboard(Key::NumPadMinus) => {
             settings.scale -= 0.2;
         }
         Button::Keyboard(Key::Z) => settings.mouse_scroll = !settings.mouse_scroll,
@@ -75,8 +77,8 @@ fn handle_press_ev(event: Button, settings: &mut ViewSettings) {
             settings.mouse_move = true;
             settings.mouse_scroll = false;
         }
-        _e => {
-            //println!("{:?}", e);
+        e => {
+            println!("{:?}", e);
         }
     }
 }
