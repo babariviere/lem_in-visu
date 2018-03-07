@@ -1,6 +1,7 @@
 use failure::Error;
 use piston_window::*;
 use std::str::FromStr;
+use rand::Rng;
 use render::*;
 
 #[derive(Debug, Fail)]
@@ -35,12 +36,33 @@ impl FromStr for RoomKind {
 }
 
 #[derive(Clone, Debug)]
+pub struct Ant {
+    pub id: u64,
+    pub color: [f32; 4],
+}
+
+impl Ant {
+    pub fn new(id: u64) -> Ant {
+        let mut rng = ::rand::thread_rng();
+        Ant {
+            id: id,
+            color: [
+                rng.gen_range(0.4, 1.),
+                rng.gen_range(0.4, 1.),
+                rng.gen_range(0.4, 1.),
+                1.,
+            ],
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct Room {
     name: String,
     kind: RoomKind,
     pos: (usize, usize),
     links: Vec<String>,
-    pub ants: Vec<u64>,
+    pub ants: Vec<Ant>,
 }
 
 impl Room {
@@ -126,7 +148,7 @@ impl Render for Room {
         } else if self.ants.len() == 0 {
             rectangle(ROOM_COLOR, rect, c.transform, g);
         } else {
-            rectangle(ANT_COLOR, rect, c.transform, g);
+            rectangle(self.ants[0].color, rect, c.transform, g);
         }
     }
 }

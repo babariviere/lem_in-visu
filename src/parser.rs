@@ -2,6 +2,7 @@ use data::*;
 use std::io::{self, BufRead};
 use std::str::FromStr;
 
+#[derive(PartialEq)]
 enum ReadingState {
     Room,
     Link,
@@ -25,8 +26,10 @@ pub fn parse(map: &mut MapData, moves: &mut AntMoves) {
                 break;
             }
         }
-        if line.starts_with("##") {
+        if line.starts_with("##") && state == ReadingState::Room {
             stdin.read_line(&mut line).unwrap();
+        } else if line.starts_with("#") {
+            continue;
         }
         if line.is_empty() {
             state = ReadingState::Moves;

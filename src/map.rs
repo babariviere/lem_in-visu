@@ -131,7 +131,7 @@ impl Map {
         for room in rooms.values_mut() {
             if room.kind() == &RoomKind::Start {
                 for i in 0..ants {
-                    room.ants.push(i as u64);
+                    room.ants.push(Ant::new(i as u64));
                 }
             }
         }
@@ -145,14 +145,20 @@ impl Map {
 
     pub fn apply_move(&mut self, ant_move: &AntMove) {
         for room in self.rooms.values_mut() {
-            if room.ants.contains(&ant_move.ant) {
-                room.ants.retain(|&x| x != ant_move.ant);
-                break;
+            let mut idx = None;
+            for (i, ant) in room.ants.iter().enumerate() {
+                if ant.id == ant_move.ant {
+                    idx = Some(i);
+                    break;
+                }
+            }
+            if let Some(i) = idx {
+                room.ants.remove(i);
             }
         }
         self.rooms
             .get_mut(&ant_move.room)
-            .map(|r| r.ants.push(ant_move.ant));
+            .map(|r| r.ants.push(Ant::new(ant_move.ant)));
     }
 }
 

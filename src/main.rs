@@ -77,8 +77,8 @@ fn handle_press_ev(event: Button, settings: &mut ViewSettings) {
             settings.mouse_move = true;
             settings.mouse_scroll = false;
         }
-        e => {
-            println!("{:?}", e);
+        _e => {
+            //println!("{:?}", e);
         }
     }
 }
@@ -92,7 +92,7 @@ fn ui_thread(map: MapData, moves: &[Vec<AntMove>]) {
         .unwrap();
     let mut settings = ViewSettings::default();
     let mut instant = Instant::now();
-    let three_secs = Duration::from_secs(3);
+    let delay = Duration::from_secs(1);
     let mut moves_idx = 0;
     let mut map: Map = map.into();
     while let Some(e) = window.next() {
@@ -129,7 +129,7 @@ fn ui_thread(map: MapData, moves: &[Vec<AntMove>]) {
             }
         });
         e.mouse_scroll(|_dx, dy| settings.scale += dy / 100.);
-        if instant.elapsed() > three_secs && moves_idx < moves.len() {
+        if instant.elapsed() > delay && moves_idx < moves.len() {
             for m in &moves[moves_idx] {
                 println!("{:?}", m);
                 map.apply_move(&m);
