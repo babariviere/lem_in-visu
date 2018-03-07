@@ -84,7 +84,7 @@ fn handle_press_ev(event: Button, settings: &mut ViewSettings) {
 }
 
 fn ui_thread(map: MapData, moves: &[Vec<AntMove>]) {
-    let mut window: PistonWindow = WindowSettings::new("Lem-in Visualiser", (600, 400))
+    let mut window: PistonWindow = WindowSettings::new("Lem-in Visualiser", (1200, 800))
         .exit_on_esc(true)
         .srgb(false)
         .opengl(OpenGL::V3_3)
@@ -92,7 +92,7 @@ fn ui_thread(map: MapData, moves: &[Vec<AntMove>]) {
         .unwrap();
     let mut settings = ViewSettings::default();
     let mut instant = Instant::now();
-    let delay = Duration::from_secs(1);
+    let delay = Duration::from_secs(2);
     let mut moves_idx = 0;
     let mut map: Map = map.into();
     while let Some(e) = window.next() {

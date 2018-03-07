@@ -144,6 +144,7 @@ impl Map {
     }
 
     pub fn apply_move(&mut self, ant_move: &AntMove) {
+        let mut ant = None;
         for room in self.rooms.values_mut() {
             let mut idx = None;
             for (i, ant) in room.ants.iter().enumerate() {
@@ -153,12 +154,14 @@ impl Map {
                 }
             }
             if let Some(i) = idx {
-                room.ants.remove(i);
+                ant = Some(room.ants.remove(i));
             }
         }
-        self.rooms
-            .get_mut(&ant_move.room)
-            .map(|r| r.ants.push(Ant::new(ant_move.ant)));
+        self.rooms.get_mut(&ant_move.room).map(|r| {
+            if let Some(a) = ant {
+                r.ants.push(a);
+            }
+        });
     }
 }
 
